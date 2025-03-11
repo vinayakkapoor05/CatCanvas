@@ -1,0 +1,25 @@
+function getcoursenums(){
+    //returns all course numbers from dashboard
+    //gotta be on dashboard page for this rn
+    let course_nums = []; for (const id of document.getElementsByClassName("ic-DashboardCard__link"))
+        {course_nums.push(String(id.href).split("/").slice(-1)[0])}
+    return course_nums
+}
+
+async function getsyllabuspagetext(courseid){
+    //returns doc object for syllabus page
+    //prob wanna use a parser or smth to extract text
+    
+	let courseUrl = "/courses/"+String(courseid)+"/assignments/syllabus"
+    try {
+        let response = await fetch(courseUrl);
+        let htmlText = await response.text();
+        // Parse the HTML into a DOM document
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(htmlText, "text/html");
+        return doc
+        console.log("request fulfilled")
+    } catch (error) {
+        console.error("Error fetching the course page:", error);
+    }
+}
