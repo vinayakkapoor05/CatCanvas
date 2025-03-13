@@ -17,8 +17,8 @@ async function getsyllabuspagetext(courseid){
         // Parse the HTML into a DOM document
         let parser = new DOMParser();
         let doc = parser.parseFromString(htmlText, "text/html");
-        return doc
-        console.log("request fulfilled")
+        const readableText = doc.body.innerText;
+        return readableText
     } catch (error) {
         console.error("Error fetching the course page:", error);
     }
