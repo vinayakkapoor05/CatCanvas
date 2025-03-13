@@ -1,23 +1,31 @@
-
-Original file line number	Original file line	Diff line number	Diff line change
-@@ -0,0 +1,24 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Canvas to Calendar</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="stytes.css">
 </head>
+
 <body>
   <div class="container">
     <h1>Canvas to Calendar</h1>
   </div>
+
+  <div class="button-container">
+    <button id="signinButton" class="apiCall()">Sign in with Google</button>
+  </div>
+
   <div class="button-container">
     <button id="syncButton" class="sync-button">Sync Deadlines</button>
   </div>
+
   <div id="results" class="results hidden">
     <div class="results-header">Sync Results:</div>
     <div id="resultsContent" class="results-content"></div>
   </div>
-  <!--script src="popup.js"></script add later when we have a popup.js file???-->
+
+  <script src="popup.js"></script>
+
 </body>
+
 </html>
