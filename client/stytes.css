@@ -35,7 +35,7 @@ h1 {
 }
 
 .sync-button {
-    background-color: #0374B5;
+    background-color: #5E1BBB;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -50,11 +50,11 @@ h1 {
 }
 
 .sync-button:hover {
-    background-color: #025E92;
+    background-color: #8a56d4;
 }
 
 .sync-button:disabled {
-    background-color: #85c1e9;
+    background-color: #8a56d4;
     cursor: not-allowed;
 }
 
@@ -63,7 +63,7 @@ h1 {
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 6px;
-    border-left: 3px solid #0374B5;
+    border-left: 3px solid #5E1BBB;
 }
 
 .results-header {
@@ -79,4 +79,22 @@ h1 {
 .results-content ul {
     margin: 5px 0;
     padding-left: 20px;
+}
+.button-container {
+    display: block;
+    margin-top: 20px;
+    align-items: center;
+    margin-left: 20px;
+}
+
+#signinButton {
+    margin-bottom: 10px;
+    background-color: white;
+    color: #5E1BBB;
+    border: 1px solid #5E1BBB;
+}
+
+#signinButton:hover {
+    background-color: #8a56d4;
+    color: white;
 }

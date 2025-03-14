@@ -1,15 +1,14 @@
 {
     "manifest_version": 3,
     "name": "My Extension",
+    "version": "1.0.0",
     "icons": {
         "16": "logo.png",
         "48": "logo.png",
         "128": "logo.png"
     },
-    "version": "1.0.0",
     "background": {
-        "service_worker": "service-worker.js",
-        "type": "module"
+        "service_worker": "service-worker.js"
     },
     "action": {
         "default_popup": "popup.html",
@@ -23,10 +22,10 @@
         "scripting",
         "storage",
         "identity",
+        "identity.email", 
         "tabs"
     ],
     "host_permissions": [
-        "https://*/*",
-        "http://*/*"
+        "https://kh77trdh96.execute-api.us-east-2.amazonaws.com/*"
     ]
 }
