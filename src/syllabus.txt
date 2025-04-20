@@ -1,6 +1,0 @@
-Course: Introduction to AI  
-Professor: Dr. Smith  
-Location: Room 101, AI Building  
-Class Schedule:  
-- Lecture: Mondays & Wednesdays, 10:00 AM - 11:30 AM (America/Los_Angeles)  
-- Office Hours: Fridays, 2:00 PM - 4:00 PM (America/Los_Angeles)  
