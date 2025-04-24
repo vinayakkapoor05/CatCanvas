@@ -1,0 +1,272 @@
+[
+  {
+    "subject": "COMP_SCI",
+    "course_number": "111-0",
+    "title": "Fund Comp Prog",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A-",
+    "points": "3.700"
+  },
+  {
+    "subject": "DSGN",
+    "course_number": "106-1",
+    "title": "DTC-1",
+    "attempted": "0.500",
+    "earned": "0.500",
+    "grade": "A",
+    "points": "2.000"
+  },
+  {
+    "subject": "ENGLISH",
+    "course_number": "106-1",
+    "title": "Writ Spec Contxt",
+    "attempted": "0.500",
+    "earned": "0.500",
+    "grade": "A",
+    "points": "2.000"
+  },
+  {
+    "subject": "GEN_ENG",
+    "course_number": "205-1",
+    "title": "Engineering Analysis I",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B",
+    "points": "3.000"
+  },
+  {
+    "subject": "MATH",
+    "course_number": "220-1",
+    "title": "Single-Variable Diff Calculus",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B+",
+    "points": "3.300"
+  },
+  {
+    "subject": "MATH",
+    "course_number": "220-1",
+    "title": "Peer-Guided Study",
+    "attempted": "0.000",
+    "earned": "0.000",
+    "grade": "S",
+    "points": "0.000"
+  },
+  {
+    "subject": "PRDV",
+    "course_number": "101-1",
+    "title": "McCormick First Year Exp",
+    "attempted": "0.000",
+    "earned": "0.000",
+    "grade": "S",
+    "points": "0.000"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "150-0",
+    "title": "Fund of Computer Prog 1.5",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A-",
+    "points": "3.700"
+  },
+  {
+    "subject": "CRDV",
+    "course_number": "301-0",
+    "title": "Intro to Career Development",
+    "attempted": "0.000",
+    "earned": "0.000",
+    "grade": "S",
+    "points": "0.000"
+  },
+  {
+    "subject": "GEN_ENG",
+    "course_number": "205-2",
+    "title": "Engineering Analysis  II",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "C",
+    "points": "2.000"
+  },
+  {
+    "subject": "MATH",
+    "course_number": "220-2",
+    "title": "Single-Variable Integ Calculus",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A-",
+    "points": "3.700"
+  },
+  {
+    "subject": "MATH",
+    "course_number": "220-2",
+    "title": "Peer-Guided Study",
+    "attempted": "0.000",
+    "earned": "0.000",
+    "grade": "S",
+    "points": "0.000"
+  },
+  {
+    "subject": "PRDV",
+    "course_number": "101-2",
+    "title": "McCormick First-Year Exp",
+    "attempted": "0.000",
+    "earned": "0.000",
+    "grade": "S",
+    "points": "0.000"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "214-0",
+    "title": "Data Structures & Algorithms",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B+",
+    "points": "3.300"
+  },
+  {
+    "subject": "DSGN",
+    "course_number": "106-2",
+    "title": "DTC-2",
+    "attempted": "0.500",
+    "earned": "0.500",
+    "grade": "A",
+    "points": "2.000"
+  },
+  {
+    "subject": "ENGLISH",
+    "course_number": "106-2",
+    "title": "Writing in Special Contexts",
+    "attempted": "0.500",
+    "earned": "0.500",
+    "grade": "A",
+    "points": "2.000"
+  },
+  {
+    "subject": "GEN_ENG",
+    "course_number": "205-3",
+    "title": "Engineering Analysis III",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "C+",
+    "points": "2.300"
+  },
+  {
+    "subject": "MATH",
+    "course_number": "228-1",
+    "title": "Multivariable Diff Calc Engr",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B",
+    "points": "3.000"
+  },
+  {
+    "subject": "ANTHRO",
+    "course_number": "215-0",
+    "title": "Study of Culture through Lang.",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "PHIL",
+    "course_number": "150-0",
+    "title": "Elementary Logic I",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "SOCIOL",
+    "course_number": "206-0",
+    "title": "Law & Society",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "211-0",
+    "title": "Fundmtls of Computer Prog II",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "348-0",
+    "title": "Introduction to AI",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B+",
+    "points": "3.300"
+  },
+  {
+    "subject": "EARTH",
+    "course_number": "203-0",
+    "title": "Earth System History",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B+",
+    "points": "3.300"
+  },
+  {
+    "subject": "PHYSICS",
+    "course_number": "135-2",
+    "title": "General Physics",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "PHYSICS",
+    "course_number": "136-2",
+    "title": "General Physics Laboratory",
+    "attempted": "0.340",
+    "earned": "0.340",
+    "grade": "A",
+    "points": "1.360"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "213-0",
+    "title": "Intro to Computer Systems",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "B+",
+    "points": "3.300"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "310-0",
+    "title": "Scalable Software Architecture",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "COMP_SCI",
+    "course_number": "329-0",
+    "title": "HCI Studio",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  },
+  {
+    "subject": "DATA_ENG",
+    "course_number": "200-0",
+    "title": "Foundations of Data Science",
+    "attempted": "1.000",
+    "earned": "1.000",
+    "grade": "A",
+    "points": "4.000"
+  }
+]

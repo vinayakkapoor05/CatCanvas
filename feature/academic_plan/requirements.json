@@ -1,0 +1,152 @@
+{
+  "degree": "Computer Science Major - McCormick School of Engineering",
+  "total_units_required": "48 or 49 units total",
+  "year_plan": {
+    "freshman": {
+      "fall": [
+        {"course": "Math 220-1", "units": 1},
+        {"course": "Gen_Eng 205-1", "units": 1},
+        {"course": "Basic Science w/ Lab (1)", "units": 1},
+        {"course": "CS 110 or 111", "units": 1},
+        {"course": "PRDV 101-1", "units": 0.34}
+      ],
+      "winter": [
+        {"course": "Math 220-2", "units": 1},
+        {"course": "Gen_Eng 205-2", "units": 1},
+        {"course": "ENGL 106-1", "units": 1},
+        {"course": "DSGN 106-1", "units": 1},
+        {"course": "CS 111 or 150", "units": 1}
+      ],
+      "spring": [
+        {"course": "Math 228-1", "units": 1},
+        {"course": "Gen_Eng 205-3", "units": 1},
+        {"course": "ENGL 106-2", "units": 1},
+        {"course": "DSGN 106-2", "units": 1},
+        {"course": "CS 214 or 211", "units": 1},
+        {"course": "PRDV 101-2", "units": 0}
+      ]
+    },
+    "sophomore": {
+      "fall": [
+        {"course": "Basic Eng (1)", "units": 1},
+        {"course": "Basic Science w/ Lab (2)", "units": 1},
+        {"course": "CS 211", "units": 1},
+        {"course": "CS Breadth (1)", "units": 1},
+        {"course": "General units", "units": 0.34}
+      ],
+      "winter": [
+        {"course": "Gen_CMN 102", "units": 1},
+        {"course": "Basic Eng (2)", "units": 1},
+        {"course": "CS 213", "units": 1},
+        {"course": "CS Breadth (2)", "units": 1}
+      ],
+      "spring": [
+        {"course": "Basic Eng (3)", "units": 1},
+        {"course": "Basic Science w/ Lab (3)", "units": 1},
+        {"course": "CS 212", "units": 1},
+        {"course": "CS Breadth (3)", "units": 1},
+        {"course": "General units", "units": 0.34}
+      ]
+    },
+    "junior": {
+      "fall": [
+        {"course": "Basic Eng (4)", "units": 1},
+        {"course": "CS Breadth (4)", "units": 1},
+        {"course": "Theme (1)", "units": 1},
+        {"course": "Tech Elect (1)", "units": 1}
+      ],
+      "winter": [
+        {"course": "Basic Eng (5)", "units": 1},
+        {"course": "Theme (2)", "units": 1},
+        {"course": "CS Breadth (5)", "units": 1},
+        {"course": "Tech Elect (2)", "units": 1}
+      ],
+      "spring": [
+        {"course": "Project 1", "units": 1},
+        {"course": "Unrestricted (1)", "units": 1},
+        {"course": "Theme (3)", "units": 1},
+        {"course": "Tech Elect (3)", "units": 1}
+      ]
+    },
+    "senior": {
+      "fall": [
+        {"course": "Unrestricted (2)", "units": 1},
+        {"course": "Tech Elect (4)", "units": 1},
+        {"course": "Project 2", "units": 1},
+        {"course": "Theme (4)", "units": 1}
+      ],
+      "winter": [
+        {"course": "Tech Elect (5)", "units": 1},
+        {"course": "Tech Elect (6)", "units": 1},
+        {"course": "Unrestricted (3)", "units": 1},
+        {"course": "Theme (5)", "units": 1}
+      ],
+      "spring": [
+        {"course": "Unrestricted (4)", "units": 1},
+        {"course": "Unrestricted (5)", "units": 1},
+        {"course": "Theme (6)", "units": 1},
+        {"course": "Theme (7)", "units": 1}
+      ]
+    }
+  },
+  "requirement_categories": {
+    "basic_sciences": {
+      "total_required": 4,
+      "description": "Minimum of 4 units comprising courses from at least two approved areas. No more than 2 units from earth and planetary sciences or astronomy. No more than 3 units from any other area.",
+      "approved_courses": {
+        "astronomy": ["ASTRON 220-0"],
+        "biology": ["BIOL_SCI 215-0", "BIOL_SCI 217-0", "BIOL_SCI 219-0", "BIOL_SCI 220-0", "BIOL_SCI 221-0", "BIOL_SCI 222-0"],
+        "chemistry": ["CHEM 131-0", "CHEM 132-0", "CHEM 141-0", "CHEM 142-0", "CHEM 151-0", "CHEM 152-0", "CHEM 161-0", "CHEM 162-0", "CHEM 171-0", "CHEM 172-0", "CHEM 181-0", "CHEM 182-0", "CHEM 210-1", "CHEM 210-2"],
+        "chemical_engineering": ["CHEM_ENG 275-0"],
+        "earth_sciences": ["EARTH 201-0", "EARTH 202-0", "EARTH 203-0"],
+        "physics": ["PHYSICS 135-2", "PHYSICS 135-3", "PHYSICS 136-2", "PHYSICS 136-3", "PHYSICS 239-0"]
+      }
+    },
+    "basic_engineering": {
+      "total_required": 5,
+      "components": [
+        {
+          "category": "Probability, statistics, and quality control",
+          "courses": ["EECS 302", "IEMS 201", "IEMS 303"],
+          "required": "One course"
+        },
+        {
+          "category": "Other basic engineering areas",
+          "required": "3 courses from at least two areas",
+          "areas": {
+            "computer_architecture_and_numerical_methods": ["EECS 203-0", "EECS 205-0", "EECS 328-0"],
+            "electrical_science": ["EECS 202-0", "EECS 221-0", "EECS 222-0", "EECS 223-0", "EECS 224-0", "EECS 270-0", "MECH_ENG 233-0"],
+            "fluids_and_solids": ["BMD_ENG 270-0", "BMD_ENG 271-0", "CHEM_ENG 321-0", "CIV_ENV 216-0", "MECH_ENG 241-0"],
+            "materials_science_and_engineering": ["MAT_SCI 201-0", "MAT_SCI 301-0"],
+            "systems_engineering_and_analysis": ["CHEM_ENG 210-0", "CIV_ENV 304-0", "IEMS 310-0", "IEMS 313-0", "IEMS 326-0"],
+            "thermodynamics": ["BMD_ENG 250-0", "CHEM_ENG 211-0", "MAT_SCI 314-0", "MAT_SCI 315-0", "MECH_ENG 222-0", "MECH_ENG 370-0"]
+          }
+        }
+      ]
+    },
+    "cs_requirements": {
+      "core_courses": ["CS 110/111", "CS 111/150", "CS 211", "CS 212", "CS 213", "CS 214"],
+      "cs_breadth": {
+        "total_required": 5,
+        "description": "CS Breadth courses"
+      },
+      "technical_electives": {
+        "total_required": 6,
+        "description": "Technical electives"
+      },
+      "project_courses": {
+        "total_required": 2,
+        "description": "Project courses"
+      }
+    },
+    "theme_courses": {
+      "total_required": 7,
+      "description": "Social Science/Humanities Theme courses",
+      "url": "https://www.mccormick.northwestern.edu/students/undergraduate/social-science-humanities-theme/"
+    },
+    "unrestricted_electives": {
+      "total_required": 5,
+      "description": "Unrestricted elective courses"
+    }
+  }
+}
