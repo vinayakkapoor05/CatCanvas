@@ -2,7 +2,7 @@
 
 /* CatCanvas Side Panel CSS */
 :root {
-  --primary-color: #9875c8; /* Terracotta/light copper color */
+  --primary-color: #9875c8;
   --primary-dark: #55387d;
   --text-color: #3d3d3d;
   --light-bg: #f8f8f8;
@@ -19,7 +19,6 @@
 }
 
 body {
-  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; */
   font-family: 'DM Mono', monospace;
   margin: 0;
   padding: 0;
