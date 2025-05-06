@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Canvas Assistant</title>
+  <title>Canvas Scraper</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 10px; width: 300px; }
-    textarea, input, button { width: 100%; margin-top: 10px; }
+    button { width: 100%; margin-top: 10px; }
     #response { margin-top: 15px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <button id="scrapeAllButton">Scrape Canvas</button>
-  <textarea id="userPrompt" placeholder="Ask a question..."></textarea>
-  <button id="queryBtn">Query LLM</button>
+  <button id="scrapeAllButton">Scrape and Save Canvas Content</button>
   <div id="response"></div>
-  <!--This is for outputting the cleaned text to be passed to llm <div id="cleanedText"></div>-->
 
   <script src="popup.js"></script>
 </body>
