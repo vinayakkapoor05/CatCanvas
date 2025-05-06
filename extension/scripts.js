@@ -7,6 +7,32 @@ const promptInput = document.getElementById("userPrompt");
 const responseDiv = document.getElementById("response");
 const statusIndicator = document.getElementById("statusIndicator");
 
+// === Dark Mode ===
+document.addEventListener('DOMContentLoaded', function() {
+  const darkModeToggle = document.getElementById('dark-mode-toggle');
+  const body = document.body;
+  
+  // Check for saved user preference
+  const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+  
+  // Apply saved preference if it exists
+  if (savedDarkMode) {
+    body.classList.add('dark-mode');
+    darkModeToggle.checked = true;
+  }
+  
+  // Toggle dark mode on switch change
+  darkModeToggle.addEventListener('change', function() {
+    if (this.checked) {
+      body.classList.add('dark-mode');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      body.classList.remove('dark-mode');
+      localStorage.setItem('darkMode', 'false');
+    }
+  });
+});
+
 // === Storage ===
 let canvasCache = ""; // Store scraped and cleaned text
 
