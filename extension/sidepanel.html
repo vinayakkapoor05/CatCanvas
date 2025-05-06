@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CatCanvas</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Monofett&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <img src="logo.png" alt="CatCanvas Logo">
+        <p><span>Cat Canvas</span></p>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div id="response"></div>
+    </div>
+
+    <div class="input-container">
+      <!-- input place -->
+      <div class="query-controls">
+        <textarea id="userPrompt" placeholder="Ask me anything about your courses..."></textarea>
+        <button id="queryBtn" class="main-button">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+
+      <!-- list different functionalites -->
+      <div class="function-menu">
+        <div class="function-item" id="syncSyllabus">
+          <i class="fa-solid fa-sync"></i>
+          <span>Sync syllabus</span>
+        </div>
+        <div class="function-item" id="calculateGrade">
+          <i class="fa-solid fa-calculator"></i>
+          <span>Calculate grade</span>
+        </div>
+        <div class="function-item" id="cameraSubmission">
+          <i class="fa-solid fa-camera"></i>
+          <span>Camera submission</span>
+        </div>
+        <div class="function-item" id="fourYearPlan">
+          <i class="fa-solid fa-calendar"></i>
+          <span>4-year plan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

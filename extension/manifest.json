@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "CatCanvas",
+    "version": "1.0",
+    "icons": {
+        "16": "logo.png",
+        "48": "logo.png",
+        "128": "logo.png"
+    },
+    "description": "Assistant for Canvas that provides information based on your course content",
+    "permissions": [
+      "activeTab", 
+      "scripting", 
+      "storage",
+      "sidePanel"
+    ],
+    "host_permissions": [
+      "https://*.instructure.com/*",
+      "https://canvas.northwestern.edu/*",
+      "https://kh77trdh96.execute-api.us-east-2.amazonaws.com/*"
+    ],
+    "side_panel": {
+      "default_path": "sidepanel.html"
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_title": "Open Canvas Assistant",
+      "default_icon": {
+        "16": "logo.png",
+        "48": "logo.png",
+        "128": "logo.png"
+        }
+    }
+  }
