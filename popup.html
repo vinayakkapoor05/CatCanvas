@@ -5,13 +5,12 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 10px; width: 300px; }
     button { width: 100%; margin-top: 10px; }
-    #response { margin-top: 15px; white-space: pre-wrap; }
+    #response { margin-top: 15px; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
   </style>
 </head>
 <body>
-  <button id="scrapeAllButton">Scrape and Save Canvas Content</button>
-  <div id="response"></div>
-
+  <button id="scrapeAllButton">Scrape and Download Canvas Content</button>
+  <div id="response">Ready.</div>
   <script src="popup.js"></script>
 </body>
 </html>

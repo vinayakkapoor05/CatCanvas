@@ -1,20 +1,23 @@
 {
-    "manifest_version": 3,
-    "name": "Canvas Course Number Scraper",
-    "version": "1.0",
-    "description": "Scrape course numbers from your Canvas dashboard and show them in a popup.",
-    "action": {
-      "default_popup": "popup.html",
-      "default_icon": "icon.png"
-    },
-    "permissions": [
-      "activeTab",
-      "scripting",
-      "storage"
-    ],
-    "host_permissions": [
-      "https://*.instructure.com/*",
-      "https://canvas.northwestern.edu/"
-    ]
+  "manifest_version": 3,
+  "name": "Canvas Course Scraper",
+  "version": "1.0",
+  "description": "Scrape full Canvas course content and download as a ZIP.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://*.instructure.com/*",
+    "https://canvas.northwestern.edu/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
   }
-  
+}
