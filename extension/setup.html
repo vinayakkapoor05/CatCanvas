@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatCanvas Setup</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Monofett&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <img src="logo.png" alt="CatCanvas Logo">
+        <p><span>CatCanvas</span></p>
+      </div>
+      <div class="dark-mode-toggle">
+        <span class="toggle-icon"><i class="fas fa-moon"></i></span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dark-mode-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </header>
+
+    <main class="content-area setup-content">
+      <div class="setup-welcome">
+        <h1>Welcome to CatCanvas</h1>
+        <p>Let's get you set up! Complete these steps to start using CatCanvas.</p>
+      </div>
+      
+      <div class="setup-steps">
+        <div class="setup-step" id="step1">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h2>Import Canvas Data</h2>
+            <p>Connect to Canvas to import your courses, assignments, and deadlines.</p>
+            <button id="setupScrapeUploadBtn" class="setup-button">
+              <i class="fa-solid fa-download"></i> Import Canvas Data
+            </button>
+            <div class="step-status" id="canvasStatus">Not started</div>
+          </div>
+        </div>
+        
+        <div class="setup-step" id="step2">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h2>Connect Calendar</h2>
+            <p>Link your Google Calendar to sync assignments and deadlines.</p>
+            <button id="setupConnectCalendarBtn" class="setup-button">
+              <i class="fa-solid fa-calendar"></i> Connect Google Calendar
+            </button>
+            <div class="step-status" id="calendarStatus">Not started</div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="setup-complete hidden" id="setupComplete">
+        <div button id="continueToAppBtn" class="setup-button primary-button">
+          <i class="fa-solid fa-arrow-right"></i> Continue
+        </button>
+        
+      </div>
+    </main>
+    
+  </div>
+
+  <script src="setup.js"></script>
+</body>
+</html>

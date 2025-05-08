@@ -21,7 +21,7 @@
       "https://kh77trdh96.execute-api.us-east-2.amazonaws.com/*"
     ],
     "side_panel": {
-      "default_path": "sidepanel.html"
+      "default_path": "setup.html"
     },
     "background": {
       "service_worker": "background.js"

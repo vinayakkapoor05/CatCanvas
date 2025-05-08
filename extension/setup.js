@@ -3,31 +3,26 @@ const API_TOKEN   = "dummy_user";
 const TOP_K       = 5;
 
 window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('setupComplete') !== 'true') {
-    window.location.href = 'setup.html';
-    return;
-  }
-
   const getEl = id => {
     const el = document.getElementById(id);
     if (!el) console.warn(`⚠️ Element #${id} not found.`);
     return el;
   };
 
-  const scrapeUploadBtn = getEl('scrapeUploadBtn');
-  const queryBtn    = getEl('queryBtn');
-  const promptInput = getEl('userPrompt');
-  promptInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-      e.preventDefault();
-      queryBtn.click();
-    }
-  });
-  
-  const responseDiv = getEl('response');
-  const statusInd   = getEl('statusIndicator');
-  const darkToggle  = getEl('dark-mode-toggle');
-  const connectBtn = getEl('connectCalendar');
+  const scrapeUploadBtn = getEl('setupScrapeUploadBtn');
+  const connectCalendarBtn = getEl('setupConnectCalendarBtn');
+  const continueBtn = getEl('continueToAppBtn');
+  const statusInd = getEl('setupStatusIndicator');
+  const canvasStatus = getEl('canvasStatus');
+  const calendarStatus = getEl('calendarStatus');
+  const setupComplete = getEl('setupComplete');
+  const step1 = getEl('step1');
+  const step2 = getEl('step2');
+  const darkToggle = getEl('dark-mode-toggle');
+
+  const isSetupComplete = localStorage.getItem('setupComplete') === 'true';
+  const isCanvasImported = localStorage.getItem('canvasImported') === 'true';
+  const isCalendarConnected = localStorage.getItem('calendarConnected') === 'true';
 
   if (darkToggle) {
     const body = document.body;
@@ -38,40 +33,61 @@ window.addEventListener('DOMContentLoaded', () => {
     darkToggle.addEventListener('change', () => {
       if (darkToggle.checked) {
         body.classList.add('dark-mode');
-        localStorage.setItem('darkMode','true');
+        localStorage.setItem('darkMode', 'true');
       } else {
         body.classList.remove('dark-mode');
-        localStorage.setItem('darkMode','false');
+        localStorage.setItem('darkMode', 'false');
       }
     });
   }
 
-  const setStatus   = txt => statusInd   && (statusInd.textContent   = txt);
-  const setResponse = txt => responseDiv && (responseDiv.textContent = txt);
-
-  async function checkCalendarConnection() {
-    try {
-      const s = await fetch(`${API_BASE}/oauth2status`, {
-        headers: { 'Authorization': `Bearer ${API_TOKEN}` }
-      });
-      const { connected } = await s.json();
-      
-      if (!connected && localStorage.getItem('calendarConnected') === 'true') {
-        localStorage.setItem('calendarConnected', 'false');
-        alert('Your Google Calendar session has expired. Please reconnect.');
-        window.location.href = 'setup.html';
-      }
-    } catch (err) {
-      console.error('Error checking calendar connection:', err);
+  const setStatus = txt => statusInd && (statusInd.textContent = txt);
+  const setCanvasStatus = (txt, isSuccess = false, isError = false) => {
+    if (canvasStatus) {
+      canvasStatus.textContent = txt;
+      canvasStatus.className = 'step-status';
+      if (isSuccess) canvasStatus.classList.add('success');
+      if (isError) canvasStatus.classList.add('error');
     }
+  };
+  const setCalendarStatus = (txt, isSuccess = false, isError = false) => {
+    if (calendarStatus) {
+      calendarStatus.textContent = txt;
+      calendarStatus.className = 'step-status';
+      if (isSuccess) calendarStatus.classList.add('success');
+      if (isError) calendarStatus.classList.add('error');
+    }
+  };
+
+  if (isSetupComplete) {
+    window.location.href = 'sidepanel.html';
+    return;
   }
 
-  checkCalendarConnection();
+  if (isCanvasImported) {
+    step1.classList.add('completed');
+    setCanvasStatus('Canvas data imported successfully!', true);
+  }
+  
+  if (isCalendarConnected) {
+    step2.classList.add('completed');
+    setCalendarStatus('Google Calendar connected!', true);
+  }
+
+  const checkSetupComplete = () => {
+    if (localStorage.getItem('canvasImported') === 'true' && 
+        localStorage.getItem('calendarConnected') === 'true') {
+      setupComplete.classList.remove('hidden');
+    }
+  };
+
+  checkSetupComplete();
 
   if (scrapeUploadBtn) {
     scrapeUploadBtn.addEventListener('click', async () => {
       setStatus('Scraping Canvas content...');
-      setResponse('');
+      setCanvasStatus('Scraping in progress...');
+      
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (!tab?.id) throw new Error('Active tab not found');
@@ -146,156 +162,114 @@ window.addEventListener('DOMContentLoaded', () => {
         const docs = results[0]?.result;
         if (!docs || typeof docs !== 'object') {
           setStatus('Error: No Canvas data returned.');
+          setCanvasStatus('Error: No Canvas data found', false, true);
           return;
         }
+        
         window.canvasCache = docs;
-        setStatus(`Scraped ${Object.keys(docs).length} courses. Uploading data...`);
-        localStorage.setItem('canvasImported', 'true');
+        setStatus('Scraped courses. Uploading data...');
+        setCanvasStatus('Importing data...');
 
-        await uploadScrapedData();
+        try {
+          const res = await fetch(`${API_BASE}/api/rag/upload`, {
+            method: 'POST', mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ docs: window.canvasCache })
+          });
+          
+          const up = await res.json();
+          if (!res.ok) throw new Error(up.detail || 'Upload failed');
+          
+          setStatus(`Indexed ${up.indexed} docs. Rebuilding index…`);
+          setCanvasStatus('Building index...');
 
+          const buildRes = await fetch(`${API_BASE}/api/rag/build`, {
+            method: 'POST', mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ overwrite: true })
+          });
+          
+          const buildJson = await buildRes.json();
+          const successMessage = buildJson.status === 'rebuilt' 
+            ? `Index rebuilt: ${buildJson.documents_indexed} docs ready.`
+            : `Build skipped: ${buildJson.reason}`;
+          
+          setStatus(successMessage);
+          setCanvasStatus('Canvas data imported successfully!', true);
+          
+          step1.classList.add('completed');
+          localStorage.setItem('canvasImported', 'true');
+          
+          checkSetupComplete();
+          
+        } catch (err) {
+          console.error(err);
+          setStatus('Upload error: ' + err.message);
+          setCanvasStatus('Error uploading data: ' + err.message, false, true);
+        }
       } catch (err) {
         console.error(err);
         setStatus('Scrape error: ' + err.message);
+        setCanvasStatus('Error scraping Canvas: ' + err.message, false, true);
       }
     });
   }
 
-  async function uploadScrapedData() {
-    if (!window.canvasCache) {
-      setStatus('No data to upload. Please scrape first.');
-      return;
-    }
-    setStatus('Uploading scraped data…');
-    try {
-      const res = await fetch(`${API_BASE}/api/rag/upload`, {
-        method: 'POST', mode: 'cors',
-        headers: {
-          'Authorization': `Bearer ${API_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ docs: window.canvasCache })
-      });
-      const up = await res.json();
-      if (!res.ok) throw new Error(up.detail || 'Upload failed');
-      setStatus(`Indexed ${up.indexed} docs. Rebuilding index…`);
-
-      const buildRes = await fetch(`${API_BASE}/api/rag/build`, {
-        method: 'POST', mode: 'cors',
-        headers: {
-          'Authorization': `Bearer ${API_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ overwrite: true })
-      });
-      const buildJson = await buildRes.json();
-      setStatus(
-        buildJson.status === 'rebuilt'
-          ? `Index rebuilt: ${buildJson.documents_indexed} docs ready.`
-          : `Build skipped: ${buildJson.reason}`
-      );
-    } catch (err) {
-      console.error(err);
-      setStatus('Upload error: ' + err.message);
-    }
-  }
-
-  queryBtn.addEventListener('click', async () => {
-    const prompt = promptInput.value.trim();
-    if (!prompt) return setStatus('Please enter a question.');
-    promptInput.value = '';
-
-    setStatus('Querying server…');
-    
-    responseDiv.textContent = '';
-    
-    const res = await fetch(`${API_BASE}/api/rag/chat`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query: prompt, top_k: TOP_K })
-    });
-  
-    if (!res.ok) {
-      setStatus(`Error ${res.status}`);
-      responseDiv.textContent = await res.text();
-      return;
-    }
-  
-    setStatus('Streaming response…');
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-  
-    while (!done) {
-      const { value, done: streamDone } = await reader.read();
-      done = streamDone;
-      if (value) {
-        responseDiv.textContent += decoder.decode(value);
-      }
-    }
-  
-    setStatus('Response complete');
-  });
-  
-  const syncBtn = getEl('addDeadlines');
-  if (syncBtn) {
-    syncBtn.addEventListener('click', async () => {
-      setStatus('Syncing deadlines…');
-      try {
-        const res = await fetch(`${API_BASE}/api/rag/deadlines`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Authorization': `Bearer ${API_TOKEN}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.detail || 'Sync failed');
-        setStatus('Deadlines Synced');
-        console.log('Deadlines:', json.deadlines);
-      } catch (err) {
-        console.error(err);
-        setStatus('Sync error: ' + err.message);
-      }
-    });
-  }
-
-  if (connectBtn) {
-    connectBtn.addEventListener('click', async () => {
-      setStatus('Opening Google sign-in…');
+  if (connectCalendarBtn) {
+    connectCalendarBtn.addEventListener('click', async () => {
+      setStatus('Opening Google sign-in...');
+      setCalendarStatus('Connecting...');
+      
       try {
         const res = await fetch(`${API_BASE}/oauth2init`, {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${API_TOKEN}` }
         });
+        
         const { auth_url } = await res.json();
         window.open(auth_url, '_blank', 'width=500,height=600');
-        setStatus('Waiting for you to grant access…');
+        setStatus('Waiting for you to grant access...');
+        setCalendarStatus('Waiting for authorization...');
   
         const poll = setInterval(async () => {
           try {
             const s = await fetch(`${API_BASE}/oauth2status`, {
               headers: { 'Authorization': `Bearer ${API_TOKEN}` }
             });
+            
             const { connected } = await s.json();
             if (connected) {
               clearInterval(poll);
               setStatus('✅ Google Calendar connected!');
+              setCalendarStatus('Google Calendar connected!', true);
+              
+              step2.classList.add('completed');
               localStorage.setItem('calendarConnected', 'true');
+              
+              checkSetupComplete();
             }
-          } catch {
+          } catch (err) {
           }
         }, 2000);
   
       } catch (err) {
         console.error(err);
         setStatus('Connect error: ' + err.message);
+        setCalendarStatus('Error connecting calendar: ' + err.message, false, true);
       }
     });
   }
-  
+
+  if (continueBtn) {
+    continueBtn.addEventListener('click', () => {
+      localStorage.setItem('setupComplete', 'true');
+      window.location.href = 'sidepanel.html';
+    });
+  }
 });
