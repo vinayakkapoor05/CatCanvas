@@ -15,6 +15,7 @@
       "sidePanel"
     ],
     "host_permissions": [
+      "http://localhost:8000/*",
       "https://*.instructure.com/*",
       "https://canvas.northwestern.edu/*",
       "https://kh77trdh96.execute-api.us-east-2.amazonaws.com/*"
@@ -25,6 +26,7 @@
     "background": {
       "service_worker": "background.js"
     },
+    
     "action": {
       "default_title": "Open Canvas Assistant",
       "default_icon": {

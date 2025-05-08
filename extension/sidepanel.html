@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CatCanvas</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -13,7 +15,7 @@
     <header>
       <div class="logo">
         <img src="logo.png" alt="CatCanvas Logo">
-        <p><span>Cat Canvas</span></p>
+        <p><span>CatCanvas</span></p>
       </div>
       <div class="dark-mode-toggle">
         <span class="toggle-icon"><i class="fas fa-moon"></i></span>
@@ -24,12 +26,12 @@
       </div>
     </header>
 
-    <div class="content-area">
+    <main class="content-area">
+      <div id="statusIndicator" class="status-indicator"></div>
       <div id="response"></div>
-    </div>
+    </main>
 
-    <div class="input-container">
-      <!-- input place -->
+    <footer class="input-container">
       <div class="query-controls">
         <textarea id="userPrompt" placeholder="Ask me anything about your courses..."></textarea>
         <button id="queryBtn" class="main-button">
@@ -37,26 +39,37 @@
         </button>
       </div>
 
-      <!-- list different functionalites -->
-      <div class="function-menu">
-        <div class="function-item" id="syncSyllabus">
-          <i class="fa-solid fa-sync"></i>
-          <span>Sync syllabus</span>
-        </div>
-        <div class="function-item" id="calculateGrade">
-          <i class="fa-solid fa-calculator"></i>
-          <span>Calculate grade</span>
-        </div>
-        <div class="function-item" id="cameraSubmission">
-          <i class="fa-solid fa-camera"></i>
-          <span>Camera submission</span>
-        </div>
-        <div class="function-item" id="fourYearPlan">
-          <i class="fa-solid fa-calendar"></i>
-          <span>4-year plan</span>
-        </div>
+      <div class="upload-controls">
+        <button id="scrapeAllButton" class="secondary-button">
+          <i class="fa-solid fa-download"></i> Scrape Canvas
+        </button>
+        <button id="uploadBtn" class="secondary-button">
+          <i class="fa-solid fa-upload"></i> Upload Data
+        </button>
+        <button id="connectCalendar">Connect Google Calendar</button>
+
       </div>
-    </div>
+
+      
+      <nav class="function-menu">
+        <button class="function-item" id="syncSyllabus">
+          <i class="fa-solid fa-sync"></i>
+          <span>Sync Syllabus</span>
+        </button>
+        <button class="function-item" id="calculateGrade">
+          <i class="fa-solid fa-calculator"></i>
+          <span>Calculate Grade</span>
+        </button>
+        <button class="function-item" id="cameraSubmission">
+          <i class="fa-solid fa-camera"></i>
+          <span>Camera Submission</span>
+        </button>
+        <button class="function-item" id="fourYearPlan">
+          <i class="fa-solid fa-calendar"></i>
+          <span>4-Year Plan</span>
+        </button>
+      </nav>
+    </footer>
   </div>
 
   <script src="scripts.js"></script>
