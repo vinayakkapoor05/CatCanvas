@@ -131,22 +131,16 @@ async def upload_docs(req: UploadRequest, user: str = Depends(get_current_user))
         syllabus_txt = None
 
         if isinstance(obj, dict):
-            # extract syllabus (could be dict with content or a raw string)
             raw_syl = obj.get("syllabus")
             if isinstance(raw_syl, dict):
                 syllabus_txt = raw_syl.get("content")
             else:
                 syllabus_txt = raw_syl
 
-            # extract pages
             if "pages" in obj and isinstance(obj["pages"], dict):
                 pages = obj["pages"]
             else:
-                # assume remaining key→text are pages
                 pages = {k: v for k, v in obj.items() if k != "syllabus"}
-        # else: obj isn't dict—ignore
-
-        # 2) Write each page .txt & index
         for slug, text in (pages or {}).items():
             fn   = f"{course_id}_{slug}.txt"
             path = os.path.join(SOURCE_DIR, fn)
@@ -160,7 +154,6 @@ async def upload_docs(req: UploadRequest, user: str = Depends(get_current_user))
             next_doc_id += 1
             count += 1
 
-        # 3) If there's a syllabus, write & index
         if syllabus_txt:
             fn   = f"{course_id}_syllabus.txt"
             path = os.path.join(SOURCE_DIR, fn)
@@ -174,7 +167,6 @@ async def upload_docs(req: UploadRequest, user: str = Depends(get_current_user))
             next_doc_id += 1
             count += 1
 
-    # persist updated index + metadata
     faiss.write_index(index, INDEX_PATH)
     np.save(META_PATH, id_to_meta)
     return {"indexed": count}
@@ -221,34 +213,29 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
         system  = {"role": "system", "content": "You are a helpful assistant for Canvas."}
         user_m  = {"role": "user",   "content": f"Context:\n{context}\n\nQ: {req.query}"}
 
-        # Create the completion with the OpenAI API
         async def generate():
             try:
-                # Use the OpenAI API to generate a response
                 stream = openai.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[system, user_m],
                     stream=True
                 )
                 
-                # Stream the response
                 for chunk in stream:
                     if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content is not None:
                         yield chunk.choices[0].delta.content
-                        # Add a small delay to ensure proper streaming
                         await asyncio.sleep(0.01)
             except Exception as e:
                 logging.error(f"Error in generate stream: {str(e)}")
                 yield f"\nError generating response: {str(e)}"
 
-        # Return a streaming response
         return StreamingResponse(
             generate(),
             media_type="text/plain",
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
-                "X-Accel-Buffering": "no"  # Disable buffering for Nginx
+                "X-Accel-Buffering": "no"  
             }
         )
     
@@ -264,11 +251,9 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
     if index is None:
         raise HTTPException(400, "Index not built.")
 
-    # 1) Group all docs by course_id
     courses = {}
     for doc_id, meta in id_to_meta.items():
         fn = meta["source_file"]
-        # we assume filenames like "{course_id}_<slug>.txt"
         m = re.match(r"(\d+)_", fn)
         if not m:
             continue
@@ -277,7 +262,6 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
 
     results = {}
 
-    # 2) For each course, bundle its text and ask the LLM to pull deadlines
     for cid, files in courses.items():
         texts = []
         for fn in files:
@@ -307,9 +291,8 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
         )
         raw = resp.choices[0].message.content.strip()
 
-        # parse LLM’s JSON
-        cleaned = re.sub(r"^```(?:json)?\s*", "", raw)      # remove opening ``` or ```json
-        cleaned = re.sub(r"\s*```$", "", cleaned)           # remove closing ```
+        cleaned = re.sub(r"^```(?:json)?\s*", "", raw)       
+        cleaned = re.sub(r"\s*```$", "", cleaned)           
         cleaned = cleaned.strip()
 
         try:
@@ -320,7 +303,6 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
             logging.error(f"[{cid}] cleaned content:\n{cleaned}")
             deadlines_list = []
 
-        # 3) log the final structure
         logging.info(f"Deadlines for course {cid}: {json.dumps(deadlines_list, indent=2)}")
 
         results[cid] = deadlines_list
@@ -328,7 +310,6 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
 
         for cid, deadlines in results.items():
             for item in deadlines:
-                # skip if due_date missing or invalid
                 if not item.get("due_date"):
                     continue
 
@@ -365,10 +346,9 @@ def get_calendar_service(user: str):
     )
     return build('calendar', 'v3', credentials=creds)
 
-# Load your OAuth client config
 GOOGLE_OAUTH2_CLIENT_SECRETS = os.path.join(BASE_DIR, 'credentials.json')
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
-# A place to persist user tokens; swap this for a real DB in production
+
 user_tokens = {}
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi import status
@@ -389,7 +369,6 @@ async def oauth2_init(user: str = Depends(get_current_user)):
         scopes=SCOPES,
         redirect_uri="http://localhost:8000/oauth2callback"
     )
-    # stash your user ID in state
     auth_url, _ = flow.authorization_url(
         access_type='offline',
         prompt='consent',
@@ -408,7 +387,7 @@ from fastapi.responses import HTMLResponse
 @app.get("/oauth2callback")
 async def oauth2_callback(
     request: Request,
-    state: str = Query(...)   # FastAPI will pull ?state=… for you
+    state: str = Query(...)    
 ):
     flow = Flow.from_client_secrets_file(
         GOOGLE_OAUTH2_CLIENT_SECRETS,
@@ -418,7 +397,6 @@ async def oauth2_callback(
     flow.fetch_token(code=request.query_params.get('code'))
     creds = flow.credentials
 
-    # 'state' is your Canvas-user token
     user_tokens[state] = {
         "token": creds.token,
         "refresh_token": creds.refresh_token,
@@ -428,7 +406,6 @@ async def oauth2_callback(
         "scopes": creds.scopes
     }
 
-    # Tell the user it worked, then they can close the tab
     return HTMLResponse("""
       <p>Calendar connected! You can now return to the extension and sync.</p>
       <script>window.close()</script>
