@@ -415,6 +415,8 @@ textarea:focus {
 
 .setup-step {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   background-color: var(--light-bg);
   border-radius: 12px;
   padding: 16px;
@@ -438,6 +440,7 @@ textarea:focus {
   font-weight: bold;
   margin-right: 16px;
   flex-shrink: 0;
+  margin-bottom: 8px;
 }
 
 .dark-mode .step-number {
