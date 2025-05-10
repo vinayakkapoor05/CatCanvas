@@ -238,7 +238,6 @@ async def query_rag(req: QueryRequest, user: str = Depends(get_current_user)):
     dists, ids = index.search(qv, req.top_k)
     return {"results": [{"id": int(i), **id_to_meta.get(i, {})} for i in ids[0]]}
 
-from fastapi.responses import StreamingResponse
 
 from fastapi.responses import StreamingResponse
 import asyncio
@@ -274,7 +273,7 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
         async def generate():
             try:
                 stream = openai.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4o",
                     messages=[system, user_m],
                     stream=True
                 )
@@ -367,7 +366,7 @@ async def plan_chat(req: ChatRequest, user: str = Depends(get_current_user)):
     async def gen():
         try:
             stream = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
                 messages=[system, user_m],
                 stream=True
             )
@@ -422,7 +421,7 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
         )
 
         resp = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant for parsing deadlines."},
                 {"role": "user",   "content": prompt},

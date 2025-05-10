@@ -33,22 +33,54 @@
             <i class="fas fa-comment"></i> Chat
           </div>
           <div class="tab" data-tab="planTab">
-            <i class="fas fa-calendar"></i> 4-Year Plan
+            <i class="fas fa-calendar"></i> Course Planning
+          </div>
+          <div class="tab" data-tab="infoTab">
+            <i class="fas fa-circle-info"></i> Info
           </div>
         </div>
-        
+
         <div id="chatTab" class="tab-content active">
           <div id="statusIndicator" class="status-indicator"></div>
           <div id="response" class="response-area"></div>
         </div>
-          
+        
         <div id="planTab" class="tab-content">
           <div class="planner-container">
             <div class="status-indicator"></div>
-            <div id="response" class="response-area"></div>  <!-- same ID as chat -->
+            <div id="response" class="response-area"></div>
+          </div>
+        </div>
+
+        <div id="infoTab" class="tab-content">
+          <div class="info-box">
+            <h2 style="margin-bottom: 8px;">CatCanvas</h2>
+
+            <p><strong>About:</strong><br>
+              CatCanvas is a Chrome extension that enhances your Canvas experience with AI-powered tools for smart course management, planning, and deadline syncing.
+            </p>
+
+            <p><strong>Built by:</strong><br>
+              Edbert Handjaja, Harry White, Neo Trovela-Villamiel, Romir Mohan, Vicheda Narith, Vinayak Kapoor
+            </p>
+
+            <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border-color);">
+
+            <p><strong>Usage Tips:</strong></p>
+            <ul style="margin-top: 4px; padding-left: 20px;">
+              <li><strong>Re-sync:</strong> Run this while on the Canvas Dashboard.</li>
+              <li><strong>Get Course History:</strong> Click “Courses” on the Canvas sidebar before using this.</li>
+            </ul>
+
+            <div class="calendar-button-container">
+              <button id="connectCalendar" class="function-item">
+                <i class="fas fa-calendar"></i> Reconnect Calendar
+              </button>
+            </div>
 
           </div>
         </div>
+
       </div>
     </main>
     
@@ -73,9 +105,14 @@
           <i class="fas fa-book"></i>
           <span>Get Course History</span>
         </button>
-        
-
       </nav>
+      <div id="infoBox" class="info-box hidden">
+        <p><strong>Instructions:</strong></p>
+        <ul>
+          <li><strong>Re-sync</strong>: Must be on the Canvas dashboard page.</li>
+          <li><strong>Get Course History</strong>: You must have clicked <em>“Courses”</em> on the Canvas sidebar first.</li>
+        </ul>
+      </div>
     </footer>
   </div>
   

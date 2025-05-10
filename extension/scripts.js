@@ -7,6 +7,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // —— TAB SWITCHING (unchanged) ——
   const tabs = document.querySelectorAll('.tab');
   const tabContents = document.querySelectorAll('.tab-content');
+  const inputContainer = document.querySelector('.input-container');
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const tabId = tab.dataset.tab;
@@ -17,9 +19,15 @@ window.addEventListener('DOMContentLoaded', () => {
           ? c.classList.add('active')
           : c.classList.remove('active');
       });
+      if (tabId === 'infoTab') {
+        inputContainer.classList.add('hidden');
+      } else {
+        inputContainer.classList.remove('hidden');
+      }
+        
     });
   });
-
+    
   // —— SETUP CHECK (unchanged) ——
   if (localStorage.getItem('setupComplete') !== 'true') {
     window.location.href = 'setup.html';
@@ -464,7 +472,8 @@ window.addEventListener('DOMContentLoaded', () => {
     queryBtn.addEventListener('click', async () => {
       const prompt = promptInput.value.trim();
       if (!prompt) return setStatus('Please enter a question.');
-    
+      promptInput.value = '';
+
       const isPlan = planTabContent.classList.contains('active');
       const endpoint = isPlan ? '/api/plan/chat' : '/api/rag/chat';
     
@@ -554,7 +563,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const { connected } = await s.json();
             if (connected) {
               clearInterval(poll);
-              setChatStatus('✅ Google Calendar connected!');
+              setChatStatus('Google Calendar connected!');
               localStorage.setItem('calendarConnected', 'true');
             }
           } catch {
@@ -568,4 +577,15 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const infoToggle = document.getElementById('infoToggle');
+  const infoBox = document.getElementById('infoBox');
+
+  if (infoToggle && infoBox) {
+    infoToggle.addEventListener('click', () => {
+      infoBox.classList.toggle('hidden');
+    });
+  }
 });
