@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Monofett&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
- 
 </head>
 <body>
   <div class="container">
@@ -30,31 +29,27 @@
     <main class="content-area">
       <div class="tabs-container">
         <div class="tabs">
-          <div class="tab active" data-tab="chat">
+          <div class="tab active" data-tab="chatTab">
             <i class="fas fa-comment"></i> Chat
           </div>
-          <div class="tab" data-tab="grades">
-            <i class="fas fa-calculator"></i> Grade Calculator
-          </div>
-          <div class="tab" data-tab="planner">
+          <div class="tab" data-tab="planTab">
             <i class="fas fa-calendar"></i> 4-Year Plan
           </div>
         </div>
         
-        <div id="chat" class="tab-content active">
+        <div id="chatTab" class="tab-content active">
           <div id="statusIndicator" class="status-indicator"></div>
-          <div id="response"></div>
+          <div id="response" class="response-area"></div>
         </div>
-        
-        <div id="grades" class="tab-content">
-          <div class="calculator-container">
-            <h3>Grade Calculator</h3>
-          </div>
-        </div>
-        
-        <div id="planner" class="tab-content">
+          
+        <div id="planTab" class="tab-content">
           <div class="planner-container">
-            <h3>4-Year Academic Plan</h3>
+            <div class="status-indicator"></div>
+            <div class="response-area"></div>
+            <button class="function-item" id="scrapeCourseButton">
+              <i class="fa-solid fa-cloud-upload-alt"></i>
+              <span>Scrape Courses</span>
+            </button>
           </div>
         </div>
       </div>
@@ -80,7 +75,7 @@
       </nav>
     </footer>
   </div>
-
+  
   <script src="scripts.js"></script>
 </body>
 </html>
