@@ -14,6 +14,14 @@ import re
 load_dotenv()
 
 
+BASE_DIR           = os.path.dirname(__file__)
+PLAN_SOURCE_DIR    = os.path.join(BASE_DIR, "plan_data")
+PLAN_INDEX_PATH    = os.path.join(BASE_DIR, "plan_faiss.index")
+PLAN_META_PATH     = os.path.join(BASE_DIR, "plan_meta.npy")
+plan_index         = None
+plan_id_to_meta    = {}
+plan_next_doc_id   = 0
+
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
@@ -48,6 +56,34 @@ async def get_current_user(
         raise HTTPException(401, "Invalid or missing token")
     return token
 
+def build_plan_index():
+    global plan_index, plan_id_to_meta, plan_next_doc_id
+    os.makedirs(PLAN_SOURCE_DIR, exist_ok=True)
+    flat   = faiss.IndexFlatL2(DIM)
+    mapper = faiss.IndexIDMap2(flat)
+    meta   = {}
+    did    = 0
+
+    # scan all .txt (or .json) in plan_data
+    for path in glob.glob(os.path.join(PLAN_SOURCE_DIR, "*.*")):
+        fn   = os.path.basename(path)
+        text = open(path, encoding="utf-8").read()
+        emb  = openai.embeddings.create(
+                  input=text,
+                  model="text-embedding-ada-002"
+              ).data[0].embedding
+        vec  = np.array(emb, dtype="float32").reshape(1, DIM)
+        mapper.add_with_ids(vec, np.array([did], dtype="int64"))
+        meta[did] = {"source_file": fn}
+        did += 1
+
+    faiss.write_index(mapper, PLAN_INDEX_PATH)
+    np.save(PLAN_META_PATH, meta)
+    plan_index       = mapper
+    plan_id_to_meta  = meta
+    plan_next_doc_id = did
+    return did
+
 def build_faiss_index():
     global index, id_to_meta, next_doc_id
     os.makedirs(SOURCE_DIR, exist_ok=True)
@@ -75,6 +111,8 @@ def build_faiss_index():
 @app.on_event("startup")
 def startup():
     global index, id_to_meta, next_doc_id
+    global plan_index, plan_id_to_meta, plan_next_doc_id
+
     os.makedirs(SOURCE_DIR, exist_ok=True)
 
     if os.path.exists(INDEX_PATH) and os.path.exists(META_PATH):
@@ -86,11 +124,31 @@ def startup():
         id_to_meta  = {}
         next_doc_id = 0
 
+    os.makedirs(PLAN_SOURCE_DIR, exist_ok=True)
+    if os.path.exists(PLAN_INDEX_PATH) and os.path.exists(PLAN_META_PATH):
+        plan_index       = faiss.read_index(PLAN_INDEX_PATH)
+        plan_id_to_meta  = np.load(PLAN_META_PATH, allow_pickle=True).item()
+        plan_next_doc_id = max(plan_id_to_meta.keys(), default=-1) + 1
+    else:
+        plan_index       = faiss.IndexIDMap2(faiss.IndexFlatL2(DIM))
+        plan_id_to_meta  = {}
+        plan_next_doc_id = 0
+
+    if plan_next_doc_id == 0:
+        # only build if there was no saved index
+        cnt = build_plan_index()
+        logging.info(f"Plan index built with {cnt} docs from {PLAN_SOURCE_DIR}")
+
+
 class BuildRequest(BaseModel):
     overwrite: bool = False
 
 class UploadRequest(BaseModel):
     docs: dict
+
+class PlanUploadRequest(BaseModel):
+    courses: dict
+
 
 class QueryRequest(BaseModel):
     query: str
@@ -242,6 +300,88 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
     except Exception as e:
         logging.error(f"Chat RAG error: {str(e)}")
         raise HTTPException(500, f"Error processing request: {str(e)}")
+
+
+@app.post("/api/plan/upload")
+async def plan_upload(req: PlanUploadRequest, user: str = Depends(get_current_user)):
+    """
+    Accepts:
+      { "courses": { currentCourses: [...], pastCourses: [...] } }
+    Embeds the entire JSON blob as one document into plan_index.
+    """
+    global plan_index, plan_id_to_meta, plan_next_doc_id
+    os.makedirs(PLAN_SOURCE_DIR, exist_ok=True)
+
+    # 1) Serialize your blob as text
+    text = json.dumps(req.courses)
+
+    # 2) Save the raw JSON (optional)
+    fn = f"scraped_{plan_next_doc_id}.json"
+    path = os.path.join(PLAN_SOURCE_DIR, fn)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+    # 3) Embed + index
+    emb = openai.embeddings.create(input=text, model="text-embedding-ada-002")\
+                           .data[0].embedding
+    vec = np.array(emb, dtype="float32").reshape(1, DIM)
+    plan_index.add_with_ids(vec, np.array([plan_next_doc_id], dtype="int64"))
+    plan_id_to_meta[plan_next_doc_id] = {"source_file": fn}
+    plan_next_doc_id += 1
+
+    # 4) Persist your new index
+    faiss.write_index(plan_index, PLAN_INDEX_PATH)
+    np.save(PLAN_META_PATH, plan_id_to_meta)
+
+    return {"indexed": 1}
+
+
+@app.post("/api/plan/chat")
+async def plan_chat(req: ChatRequest, user: str = Depends(get_current_user)):
+    if plan_index is None:
+        raise HTTPException(400, "Plan index not built.")
+    # embed the query
+    emb = openai.embeddings.create(input=req.query, model="text-embedding-ada-002")\
+                           .data[0].embedding
+    qv  = np.array(emb, dtype="float32").reshape(1, DIM)
+    _, ids = plan_index.search(qv, req.top_k)
+
+    # pull down that one big JSON document (or however many you’ve indexed)
+    docs = []
+    for i in ids[0]:
+        meta = plan_id_to_meta.get(i)
+        if not meta: continue
+        fn = meta["source_file"]
+        p  = os.path.join(PLAN_SOURCE_DIR, fn)
+        if os.path.isfile(p):
+            docs.append(open(p, encoding="utf-8").read())
+
+    if not docs:
+        return {"response": "No plan data indexed yet."}
+
+    context = "\n---\n".join(docs)
+    system = {"role":"system","content":"You are an academic advisor for course planning."}
+    user_m = {"role":"user","content":f"Context:\n{context}\n\nQ: {req.query}"}
+
+    # stream the answer back
+    async def gen():
+        try:
+            stream = openai.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[system, user_m],
+                stream=True
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta
+                # use attribute access instead of dict.get()
+                if getattr(delta, "content", None):
+                    yield delta.content
+                    await asyncio.sleep(0.01)
+        except Exception as e:
+            logging.error(f"Error in generate stream: {e}")
+            yield f"\nError generating response: {e}"
+
+    return StreamingResponse(gen(), media_type="text/plain")
 
 
 logging.basicConfig(level=logging.INFO)
@@ -410,3 +550,4 @@ async def oauth2_callback(
       <p>Calendar connected! You can now return to the extension and sync.</p>
       <script>window.close()</script>
     """)
+

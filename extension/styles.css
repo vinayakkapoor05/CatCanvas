@@ -268,6 +268,7 @@ textarea:focus {
 
 .function-item {
   border: none;    
+  font-size: 8px;
   font: inherit;          
   border-bottom: 2px solid transparent;
   padding: 8px 16px;
@@ -282,7 +283,6 @@ textarea:focus {
   gap: 8px;
   background: none;
   border: none;
-  font-size: 13px;
   color: var(--text-color);
 }
 

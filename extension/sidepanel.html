@@ -45,11 +45,8 @@
         <div id="planTab" class="tab-content">
           <div class="planner-container">
             <div class="status-indicator"></div>
-            <div class="response-area"></div>
-            <button class="function-item" id="scrapeCourseButton">
-              <i class="fa-solid fa-cloud-upload-alt"></i>
-              <span>Scrape Courses</span>
-            </button>
+            <div id="response" class="response-area"></div>  <!-- same ID as chat -->
+
           </div>
         </div>
       </div>
@@ -65,13 +62,19 @@
       
       <nav class="function-menu">
         <button class="function-item" id="scrapeUploadBtn">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <span>Re-sync Canvas</span>
+          <i class="fas fa-rotate-right"></i>
+          <span>Re-sync</span>
         </button>
         <button class="function-item" id="addDeadlines">
           <i class="fa-solid fa-calendar-plus"></i>
-          <span>Add deadlines</span>
+          <span>Add Dates</span>
         </button>
+        <button class="function-item" id="scrapeCourseButton">
+          <i class="fas fa-book"></i>
+          <span>Get Course History</span>
+        </button>
+        
+
       </nav>
     </footer>
   </div>

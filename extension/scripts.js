@@ -86,40 +86,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // —— PROGRESS BAR INJECTION ——
   // Add progress bar to Plan tab
-  let planProgressBar = null;
-  if (planResponseDiv) {
-    planProgressBar = document.createElement('progress');
-    planProgressBar.style.width = '100%';
-    planProgressBar.style.display = 'none';
-    planResponseDiv.parentNode.insertBefore(planProgressBar, planResponseDiv.nextSibling);
-  }
 
-  // Progress bar for chat tab
-  let chatProgressBar = null;
-  if (chatResponseDiv) {
-    chatProgressBar = document.createElement('progress');
-    chatProgressBar.style.width = '100%';
-    chatProgressBar.style.display = 'none';
-    chatResponseDiv.parentNode.insertBefore(chatProgressBar, chatResponseDiv.nextSibling);
-  }
-
-  function updatePlanUI(msg, isError = false, showProgress = false) {
-    if (!planResponseDiv) return;
-    planResponseDiv.textContent = msg;
-    planResponseDiv.style.color = isError ? 'red' : 'black';
-    if (planProgressBar) {
-      planProgressBar.style.display = showProgress ? 'block' : 'none';
-    }
-  }
-
+  
+  // now sends into the status‐indicator div
   function updatePlanProgress(msg, pct) {
-    updatePlanUI(msg, false, true);
-    if (planProgressBar) {
-      planProgressBar.value = pct;
-      planProgressBar.max = 100;
-    }
+    if (planStatusInd) planStatusInd.textContent = msg;
   }
-
+  
   // —— SCRAPE COURSES FLOW (Now uses Plan tab status) ——
   if (scrapeCourseBtn) {
     scrapeCourseBtn.addEventListener('click', scrapeCourses);
@@ -130,7 +103,7 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab.url.includes("canvas.northwestern.edu")) {
-        updatePlanUI("Error: Please navigate to Canvas first!", true);
+        updatePlanProgress("Error: Please navigate to Canvas first!", true);
         return;
       }
 
@@ -147,7 +120,7 @@ window.addEventListener('DOMContentLoaded', () => {
           func: navigateToCoursesPage
         });
         if (!navOk) {
-          updatePlanUI("Error: Could not find courses navigation. Please try manually.", true);
+          updatePlanProgress("Error: Could not find courses. Make sure you click 'Courses' in the left sidebar.", true);
           return;
         }
         updatePlanProgress("Waiting for page to load...", 35);
@@ -161,47 +134,70 @@ window.addEventListener('DOMContentLoaded', () => {
         func: scrapeCourseData
       });
       if (!data || data.error) {
-        updatePlanUI(`Error: ${data?.error || 'No data returned.'}`, true);
+        updatePlanProgress(`Error: ${data?.error || 'No data returned.'}`, true);
         return;
       }
 
       updatePlanProgress("Processing scraped data...", 80);
       const total = (data.currentCourses?.length || 0) + (data.pastCourses?.length || 0);
       if (total === 0) {
-        updatePlanUI("No classes found. Make sure you're on the correct page.", true);
+        updatePlanProgress("No classes found. Make sure you're on the correct page.", true);
         return;
       }
 
-      const blob = new Blob([JSON.stringify({
-        current_classes: data.currentCourses,
-        past_classes:    data.pastCourses
-      }, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      // const blob = new Blob([JSON.stringify({
+      //   currentCourses: data.currentCourses,
+      //   pastCourses:    data.pastCourses
 
-      updatePlanProgress("Saving data to file...", 90);
+      // }, null, 2)], { type: 'application/json' });
+      // const url = URL.createObjectURL(blob);
 
-      // plain-<a> download instead of chrome.downloads
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'canvas_classes.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // updatePlanProgress("Saving data to file...", 90);
+
+      // // plain-<a> download instead of chrome.downloads
+      // const a = document.createElement('a');
+      // a.href = url;
+      // a.download = 'canvas_classes.json';
+      // document.body.appendChild(a);
+      // a.click();
+      // document.body.removeChild(a);
+      // URL.revokeObjectURL(url);
       
-      updatePlanUI(
-        `Success! Scraped ${total} classes.\n` +
-        `Current: ${data.currentCourses.length}, Past: ${data.pastCourses.length}\n\n` +
-        `Saved to canvas_classes.json`
-      );
-      if (planProgressBar) {
-        planProgressBar.style.display = 'none';
-      }
+      // updatePlanUI(
+      //   `Success! Scraped ${total} classes.\n` +
+      //   `Current: ${data.currentCourses.length}, Past: ${data.pastCourses.length}\n\n` +
+      //   `Saved to canvas_classes.json`
+      // );
+      // if (planProgressBar) {
+      //   planProgressBar.style.display = 'none';
+      // }
       
-      URL.revokeObjectURL(url);
+  updatePlanProgress("Uploading to Plan index…", 90);
+  const blobData = {
+    currentCourses: data.currentCourses,
+    pastCourses:    data.pastCourses
+  };
+  
+  const res = await fetch(`${API_BASE}/api/plan/upload`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_TOKEN}`,
+      'Content-Type':  'application/json'
+    },
+    body: JSON.stringify({ courses: blobData })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    return updatePlanProgress("Upload error: " + err, true);
+  }
+  const j = await res.json();
+  if (planStatusInd) planStatusInd.textContent = '';
+  updatePlanProgress(`Success! Indexed ${j.indexed} document(s) for planning.`);
+
+  
 
     } catch (err) {
-      updatePlanUI("Scrape error: " + err.message, true);
+      updatePlanProgress("Scrape error: " + err.message, true);
     }
   }
 
@@ -426,16 +422,59 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   if (queryBtn) {
+    // queryBtn.addEventListener('click', async () => {
+    //   const prompt = promptInput.value.trim();
+    //   if (!prompt) return setChatStatus('Please enter a question.');
+    //   promptInput.value = '';
+
+    //   setChatStatus('Querying server…');
+      
+    //   chatResponseDiv.textContent = '';
+      
+    //   const res = await fetch(`${API_BASE}/api/rag/chat`, {
+    //     method: 'POST',
+    //     headers: {
+    //       'Authorization': `Bearer ${API_TOKEN}`,
+    //       'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({ query: prompt, top_k: TOP_K })
+    //   });
+    
+    //   if (!res.ok) {
+    //     setChatStatus(`Error ${res.status}`);
+    //     chatResponseDiv.textContent = await res.text();
+    //     return;
+    //   }
+    
+    //   setChatStatus('Streaming response…');
+    //   const reader = res.body.getReader();
+    //   const decoder = new TextDecoder();
+    //   let done = false;
+    
+    //   while (!done) {
+    //     const { value, done: streamDone } = await reader.read();
+    //     done = streamDone;
+    //     if (value) {
+    //       chatResponseDiv.textContent += decoder.decode(value);
+    //     }
+    //   }
+    
+    //   setChatStatus('Response complete');
+    // });
     queryBtn.addEventListener('click', async () => {
       const prompt = promptInput.value.trim();
-      if (!prompt) return setChatStatus('Please enter a question.');
-      promptInput.value = '';
-
-      setChatStatus('Querying server…');
-      
-      chatResponseDiv.textContent = '';
-      
-      const res = await fetch(`${API_BASE}/api/rag/chat`, {
+      if (!prompt) return setStatus('Please enter a question.');
+    
+      const isPlan = planTabContent.classList.contains('active');
+      const endpoint = isPlan ? '/api/plan/chat' : '/api/rag/chat';
+    
+      // clear both status & the old response
+      setStatus('');
+      if (isPlan) setPlanResponse('');
+      else        setChatResponse('');
+    
+      setStatus('Querying ' + (isPlan ? 'Plan' : 'Canvas') + ' server…');
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${API_TOKEN}`,
@@ -445,12 +484,14 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     
       if (!res.ok) {
-        setChatStatus(`Error ${res.status}`);
-        chatResponseDiv.textContent = await res.text();
+        setStatus(`Error ${res.status}`);
+        const txt = await res.text();
+        if (isPlan) setPlanResponse(txt);
+        else        setChatResponse(txt);
         return;
       }
     
-      setChatStatus('Streaming response…');
+      setStatus('Streaming response…');
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
@@ -459,12 +500,15 @@ window.addEventListener('DOMContentLoaded', () => {
         const { value, done: streamDone } = await reader.read();
         done = streamDone;
         if (value) {
-          chatResponseDiv.textContent += decoder.decode(value);
+          const chunk = decoder.decode(value);
+          if (isPlan) setPlanResponse(planResponseDiv.textContent + chunk);
+          else        setChatResponse(chatResponseDiv.textContent + chunk);
         }
       }
     
-      setChatStatus('Response complete');
+      setStatus('Response complete');
     });
+      
   }
   
   if (addDeadlinesBtn) {
