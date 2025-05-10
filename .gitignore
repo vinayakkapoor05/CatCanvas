@@ -1,6 +1,6 @@
 .DS_Store
 __pycache__/
-/thing/src/search/data/txts
+/backend/data/txts
 credentials.json
 .env
 canvas_faiss.index
@@ -8,3 +8,4 @@ canvas_meta.npy
 plan_faiss.index
 plan_meta.npy
 scraped*
+.DS_Store

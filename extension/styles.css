@@ -692,3 +692,32 @@ textarea:focus {
   display: none;
 }
 
+
+
+/* reconnect-calendar button */
+#connectCalendar {
+  border: 2px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-radius: 8px;
+  padding: 8px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+#connectCalendar:hover {
+  border-color: var(--primary-dark);
+  background-color: var(--primary-dark);
+}
+
+/* dark-mode overrides */
+.dark-mode #connectCalendar {
+  border-color: var(--dark-primary-color);
+  background-color: var(--dark-primary-color);
+  color: var(--dark-white);
+}
+
+.dark-mode #connectCalendar:hover {
+  border-color: var(--dark-primary-dark);
+  background-color: var(--dark-primary-dark);
+}
