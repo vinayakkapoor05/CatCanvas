@@ -285,7 +285,7 @@ textarea:focus {
   font-size: 8px;
   font: inherit;          
   border-bottom: 2px solid transparent;
-  padding: 8px 16px;
+  padding: 8px 8px;
   cursor: pointer;
   display: flex;
   align-items: center;

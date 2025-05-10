@@ -11,6 +11,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import re
+import uuid
+from typing import Dict, List, Optional
+
+# Add LangChain imports
+from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain.schema import messages_from_dict, messages_to_dict
+from langchain.schema import HumanMessage, AIMessage
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chat_models import ChatOpenAI
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+
 load_dotenv()
 
 
@@ -37,6 +49,10 @@ META_PATH   = os.path.join(BASE_DIR, "canvas_meta.npy")
 index            = None
 id_to_meta       = {}
 next_doc_id      = 0
+
+# Memory storage - we'll use a dictionary to store conversation history
+# Keys will be user IDs, values will be the conversation memory
+conversation_memory: Dict[str, ChatMessageHistory] = {}
 
 app = FastAPI()
 app.add_middleware(
@@ -157,6 +173,7 @@ class QueryRequest(BaseModel):
 class ChatRequest(BaseModel):
     query: str
     top_k: int = 5
+    conversation_id: Optional[str] = None  # Add conversation ID for memory tracking
 
 @app.post("/api/rag/build")
 async def rebuild(req: BuildRequest, user: str = Depends(get_current_user)):
@@ -248,6 +265,13 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
         raise HTTPException(400, "Index not built.")
     
     try:
+        # Create or retrieve conversation history
+        conversation_id = req.conversation_id or str(uuid.uuid4())
+        if conversation_id not in conversation_memory:
+            conversation_memory[conversation_id] = ChatMessageHistory()
+        
+        message_history = conversation_memory[conversation_id]
+        
         # Get embeddings for the query
         emb = openai.embeddings.create(input=req.query, model="text-embedding-ada-002").data[0].embedding
         qv  = np.array(emb, dtype="float32").reshape(1, DIM)
@@ -264,27 +288,54 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
                 docs.append(open(path, encoding="utf-8").read())
 
         if not docs:
-            return {"response": "No documents found for this query."}
+            return {"response": "No documents found for this query.", "conversation_id": conversation_id}
 
         context = "\n---\n".join(docs)
-        system  = {"role": "system", "content": "You are a helpful assistant for Canvas."}
-        user_m  = {"role": "user",   "content": f"Context:\n{context}\n\nQ: {req.query}"}
-
+        
+        # Add the user's query to memory
+        message_history.add_user_message(req.query)
+        
+        # Convert memory to messages format
+        memory_messages = []
+        for msg in message_history.messages:
+            if isinstance(msg, HumanMessage):
+                memory_messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                memory_messages.append({"role": "assistant", "content": msg.content})
+        
+        # Prepare the system message with context
+        system_message = {"role": "system", "content": f"You are a helpful assistant for Canvas. Use the following context to answer questions, and remember previous parts of the conversation.\n\nContext:\n{context}"}
+        
+        # Complete list of messages for the API call
+        all_messages = [system_message] + memory_messages
+        
+        collected_response = []
+        
         async def generate():
             try:
                 stream = openai.chat.completions.create(
                     model="gpt-4o",
-                    messages=[system, user_m],
+                    messages=all_messages,
                     stream=True
                 )
                 
+                full_response = ""
+                
                 for chunk in stream:
                     if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content is not None:
-                        yield chunk.choices[0].delta.content
+                        content = chunk.choices[0].delta.content
+                        full_response += content
+                        yield content
                         await asyncio.sleep(0.01)
+                        
+                # After generating the full response, add it to memory
+                message_history.add_ai_message(full_response)
+                
             except Exception as e:
                 logging.error(f"Error in generate stream: {str(e)}")
-                yield f"\nError generating response: {str(e)}"
+                error_msg = f"\nError generating response: {str(e)}"
+                yield error_msg
+                message_history.add_ai_message(error_msg)
 
         return StreamingResponse(
             generate(),
@@ -292,7 +343,8 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
-                "X-Accel-Buffering": "no"  
+                "X-Accel-Buffering": "no",
+                "X-Conversation-ID": conversation_id
             }
         )
     
@@ -300,6 +352,23 @@ async def chat_rag(req: ChatRequest, user: str = Depends(get_current_user)):
         logging.error(f"Chat RAG error: {str(e)}")
         raise HTTPException(500, f"Error processing request: {str(e)}")
 
+# New endpoint to clear conversation history
+@app.post("/api/rag/clear_memory")
+async def clear_memory(conversation_id: str, user: str = Depends(get_current_user)):
+    if conversation_id in conversation_memory:
+        del conversation_memory[conversation_id]
+        return {"status": "success", "message": f"Conversation {conversation_id} memory cleared"}
+    return {"status": "success", "message": f"No conversation found with ID {conversation_id}"}
+
+# New endpoint to list active conversations
+@app.get("/api/rag/conversations")
+async def list_conversations(user: str = Depends(get_current_user)):
+    return {
+        "conversations": [
+            {"id": conv_id, "message_count": len(history.messages)}
+            for conv_id, history in conversation_memory.items()
+        ]
+    }
 
 @app.post("/api/plan/upload")
 async def plan_upload(req: PlanUploadRequest, user: str = Depends(get_current_user)):
@@ -339,13 +408,21 @@ async def plan_upload(req: PlanUploadRequest, user: str = Depends(get_current_us
 async def plan_chat(req: ChatRequest, user: str = Depends(get_current_user)):
     if plan_index is None:
         raise HTTPException(400, "Plan index not built.")
+
+    # Create or retrieve conversation history for plan chat
+    conversation_id = req.conversation_id or f"plan_{str(uuid.uuid4())}"
+    if conversation_id not in conversation_memory:
+        conversation_memory[conversation_id] = ChatMessageHistory()
+    
+    message_history = conversation_memory[conversation_id]
+        
     # embed the query
     emb = openai.embeddings.create(input=req.query, model="text-embedding-ada-002")\
                            .data[0].embedding
     qv  = np.array(emb, dtype="float32").reshape(1, DIM)
     _, ids = plan_index.search(qv, req.top_k)
 
-    # pull down that one big JSON document (or however many you’ve indexed)
+    # pull down that one big JSON document (or however many you've indexed)
     docs = []
     for i in ids[0]:
         meta = plan_id_to_meta.get(i)
@@ -356,31 +433,66 @@ async def plan_chat(req: ChatRequest, user: str = Depends(get_current_user)):
             docs.append(open(p, encoding="utf-8").read())
 
     if not docs:
-        return {"response": "No plan data indexed yet."}
+        return {"response": "No plan data indexed yet.", "conversation_id": conversation_id}
 
     context = "\n---\n".join(docs)
-    system = {"role":"system","content":"You are an academic advisor for course planning."}
-    user_m = {"role":"user","content":f"Context:\n{context}\n\nQ: {req.query}"}
+    
+    # Add the user's query to memory
+    message_history.add_user_message(req.query)
+    
+    # Convert memory to messages format
+    memory_messages = []
+    for msg in message_history.messages:
+        if isinstance(msg, HumanMessage):
+            memory_messages.append({"role": "user", "content": msg.content})
+        elif isinstance(msg, AIMessage):
+            memory_messages.append({"role": "assistant", "content": msg.content})
+    
+    # Prepare the system message with context
+    system_message = {"role": "system", "content": f"You are an academic advisor for course planning. Use the following context to answer questions, and remember previous parts of the conversation.\n\nContext:\n{context}"}
+    
+    # Complete list of messages for the API call
+    all_messages = [system_message] + memory_messages
 
     # stream the answer back
     async def gen():
         try:
             stream = openai.chat.completions.create(
                 model="gpt-4o",
-                messages=[system, user_m],
+                messages=all_messages,
                 stream=True
             )
+            
+            full_response = ""
+            
             for chunk in stream:
                 delta = chunk.choices[0].delta
                 # use attribute access instead of dict.get()
                 if getattr(delta, "content", None):
-                    yield delta.content
+                    content = delta.content
+                    full_response += content
+                    yield content
                     await asyncio.sleep(0.01)
+                    
+            # After generating the full response, add it to memory
+            message_history.add_ai_message(full_response)
+                
         except Exception as e:
             logging.error(f"Error in generate stream: {e}")
-            yield f"\nError generating response: {e}"
+            error_msg = f"\nError generating response: {e}"
+            yield error_msg
+            message_history.add_ai_message(error_msg)
 
-    return StreamingResponse(gen(), media_type="text/plain")
+    return StreamingResponse(
+        gen(), 
+        media_type="text/plain",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+            "X-Conversation-ID": conversation_id
+        }
+    )
 
 
 logging.basicConfig(level=logging.INFO)
@@ -419,6 +531,7 @@ async def extract_deadlines(user: str = Depends(get_current_user)):
             '[ { "title": "...", "due_date": "...", "type": "..." }, … ]\n\n'
             f"CONTEXT:\n{context}"
         )
+
 
         resp = openai.chat.completions.create(
             model="gpt-4o",
@@ -549,4 +662,3 @@ async def oauth2_callback(
       <p>Calendar connected! You can now return to the extension and sync.</p>
       <script>window.close()</script>
     """)
-

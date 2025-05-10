@@ -53,34 +53,37 @@
         </div>
 
         <div id="infoTab" class="tab-content">
-          <div class="info-box">
-            <h2 style="margin-bottom: 8px;">CatCanvas</h2>
-
-            <p><strong>About:</strong><br>
+          <div class="info-box" style="padding: 16px; /* overall padding */">
+            <h2 style="margin-bottom: 16px;">CatCanvas</h2>
+        
+            <p style="margin-bottom: 16px;">
+              <strong>About:</strong><br>
               CatCanvas is a Chrome extension that enhances your Canvas experience with AI-powered tools for smart course management, planning, and deadline syncing.
             </p>
-
-            <p><strong>Built by:</strong><br>
+        
+            <p style="margin-bottom: 16px;">
+              <strong>Built by:</strong><br>
               Edbert Handjaja, Harry White, Neo Trovela-Villamiel, Romir Mohan, Vicheda Narith, Vinayak Kapoor
             </p>
+        
+            <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border-color);">
+        
+            <p style="margin-bottom: 8px;"><strong>Usage Tips:</strong></p>
+            <ul style="margin: 8px 0 16px 20px; padding: 0;">
+              <li><strong>Re-sync:</strong> Run this while on the Canvas Dashboard and on the 'Chat' tab.</li>
+              <li><strong>Get Course History:</strong> Click “Courses” on the Canvas sidebar before using this and while on the 'Course Planning' tab.</li>
+              <li><strong>Calendar Login:</strong> You may need to log back into your Google Calendar occasionally:</li>
 
-            <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border-color);">
-
-            <p><strong>Usage Tips:</strong></p>
-            <ul style="margin-top: 4px; padding-left: 20px;">
-              <li><strong>Re-sync:</strong> Run this while on the Canvas Dashboard.</li>
-              <li><strong>Get Course History:</strong> Click “Courses” on the Canvas sidebar before using this.</li>
             </ul>
-
-            <div class="calendar-button-container">
+        
+            <div class="calendar-button-container" style="margin-top: 16px;">
               <button id="connectCalendar" class="function-item">
                 <i class="fas fa-calendar"></i> Reconnect Calendar
               </button>
             </div>
-
           </div>
         </div>
-
+        
       </div>
     </main>
     
@@ -105,6 +108,11 @@
           <i class="fas fa-book"></i>
           <span>Get Course History</span>
         </button>
+        <button id="clearChatBtn" class="function-item">
+          <i class="fas fa-trash"></i>
+          <span>Clear Chat</span>
+        </button>
+
       </nav>
       <div id="infoBox" class="info-box hidden">
         <p><strong>Instructions:</strong></p>
